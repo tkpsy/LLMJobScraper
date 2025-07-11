@@ -10,7 +10,7 @@ from ..models.user_profile import UserProfile
 from api import get_client, generate_chat_completion
 from openai import OpenAI
 from ..utils.logger import setup_logger
-from ..filters.job_filters import apply_filters  # 新しいフィルターをインポート
+from ..filters.job_filters import apply_filters
 
 logger = setup_logger(__name__)
 
@@ -19,10 +19,10 @@ class JobMatch:
     """案件とマッチング結果"""
     job: Dict  # 案件情報
     relevance_score: float  # 関連度スコア（0-100）
-    match_reasons: List[str]  # マッチする理由
-    concerns: List[str]  # 注意点や懸念事項
     quick_filtered: bool = False  # クイックフィルタリングで除外されたかどうか
     filter_reason: str = ""  # フィルタリングされた理由
+
+BATCH_SIZE = 3  # 一度に評価する案件数
 
 class JobMatcher:
     """案件とユーザーのマッチングを行うクラス"""
@@ -40,24 +40,25 @@ class JobMatcher:
         """
         return apply_filters(job, user_profile)
 
-    def evaluate_job_with_llm(self, job: Dict, user_profile: UserProfile) -> JobMatch:
-        """LLMを使用して案件とユーザーの相性を評価"""
-        # クイックフィルタリングを実施
-        should_filter, filter_reason = self.quick_filter_job(job, user_profile)
-        if should_filter:
-            return JobMatch(
-                job=job,
-                relevance_score=0.0,
-                match_reasons=[],
-                concerns=[],
-                quick_filtered=True,
-                filter_reason=filter_reason
-            )
-
-        # 以下、既存のLLM評価コード
+    def evaluate_jobs_batch(self, jobs: List[Dict], user_profile: UserProfile) -> List[JobMatch]:
+        """複数の案件を一括で評価"""
         prompt = f"""
-あなたは、フリーランス案件とユーザーの相性を評価する専門家です。
-以下の情報を基に、案件とユーザーの相性を分析し、JSONフォーマットで出力してください。
+以下のユーザープロファイルと案件情報を基に、各案件の関連度スコアを評価してください。
+
+【評価基準】
+スコアの基準:
+- 0-20点: ユーザープロファイルと全く合致しない
+- 21-40点: ユーザープロファイルとの合致が低い
+- 41-60点: ユーザープロファイルと部分的に合致
+- 61-80点: ユーザープロファイルと良く合致
+- 81-100点: ユーザープロファイルと非常に良く合致
+
+以下の要素を総合的に評価してください：
+1. スキルの合致度
+2. 希望カテゴリとの合致度
+3. 希望する働き方との合致度
+4. 予算の適切性
+5. 経験年数との適合性
 
 【ユーザープロファイル】
 - スキル: {', '.join(user_profile.skills)}
@@ -67,17 +68,24 @@ class JobMatcher:
 - 希望最低予算: {user_profile.min_budget}円
 - 追加情報: {user_profile.description}
 
-【案件情報】
-- タイトル: {job['title']}
-- カテゴリ: {job['category']}
-- 予算: {job['budget']['type']} ({job['budget']['min_amount']}円 ～ {job['budget']['max_amount']}円)
-- 説明: {job['description']}
+【評価対象案件】
+{json.dumps([{
+    'id': i,
+    'title': job['title'],
+    'category': job['category'],
+    'budget': job['budget'],
+    'description': job['description']
+} for i, job in enumerate(jobs)], ensure_ascii=False, indent=2)}
 
 以下の形式でJSONを出力してください:
 {{
-    "relevance_score": 0-100のスコア,
-    "match_reasons": [マッチする理由のリスト（最大3つ）],
-    "concerns": [注意点や懸念事項のリスト（最大3つ）]
+    "scores": [
+        {{ 
+            "id": 案件ID,
+            "score": 0-100のスコア
+        }},
+        ...
+    ]
 }}
 """
 
@@ -85,7 +93,7 @@ class JobMatcher:
             response = generate_chat_completion(
                 client=self.client,
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that evaluates job matches."},
+                    {"role": "system", "content": "You are a helpful assistant that evaluates job matches based on user profile requirements."},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
@@ -96,24 +104,30 @@ class JobMatcher:
                 result = json.loads(response.choices[0].message.content)
             else:
                 result = json.loads(response['choices'][0]['message']['content'])
+
+            # スコアを各案件に割り当て
+            job_matches = []
+            for job in jobs:
+                score_info = next((s for s in result['scores'] if s['id'] == len(job_matches)), None)
+                score = float(score_info['score']) if score_info else 0.0
+                # スコアの範囲を確認
+                score = max(0.0, min(100.0, score))
+                
+                job_matches.append(JobMatch(
+                    job=job,
+                    relevance_score=score,
+                    quick_filtered=False
+                ))
             
-            return JobMatch(
-                job=job,
-                relevance_score=float(result['relevance_score']),
-                match_reasons=result['match_reasons'],
-                concerns=result['concerns'],
-                quick_filtered=False
-            )
-        
+            return job_matches
+
         except Exception as e:
             logger.error(f"評価中にエラーが発生しました: {e}")
-            return JobMatch(
+            return [JobMatch(
                 job=job,
                 relevance_score=0.0,
-                match_reasons=[],
-                concerns=[f"評価エラー: {str(e)}"],
                 quick_filtered=False
-            )
+            ) for job in jobs]
 
     def find_matching_jobs(
         self,
@@ -139,13 +153,43 @@ class JobMatcher:
         
         # 各案件を評価
         matches = []
-        all_evaluations = []  # 全ての評価結果を保存
+        all_evaluations = []
+        
+        # バッチ処理用の一時リスト
+        batch_jobs = []
         
         for job in tqdm(jobs, desc="案件評価の進捗", unit="件"):
-            match = self.evaluate_job_with_llm(job, user_profile)
-            all_evaluations.append(match)  # 全ての評価結果を保存
-            if match.relevance_score >= min_score:
-                matches.append(match)
+            # クイックフィルタを適用
+            should_filter, reason = self.quick_filter_job(job, user_profile)
+            if should_filter:
+                match = JobMatch(
+                    job=job,
+                    relevance_score=0.0,
+                    quick_filtered=True,
+                    filter_reason=reason
+                )
+                all_evaluations.append(match)
+                continue
+            
+            # フィルタを通過した案件をバッチに追加
+            batch_jobs.append(job)
+            
+            # バッチサイズに達したら評価実行
+            if len(batch_jobs) >= BATCH_SIZE:
+                batch_matches = self.evaluate_jobs_batch(batch_jobs, user_profile)
+                for match in batch_matches:
+                    all_evaluations.append(match)
+                    if match.relevance_score >= min_score:
+                        matches.append(match)
+                batch_jobs = []  # バッチをクリア
+        
+        # 残りの案件を評価
+        if batch_jobs:
+            batch_matches = self.evaluate_jobs_batch(batch_jobs, user_profile)
+            for match in batch_matches:
+                all_evaluations.append(match)
+                if match.relevance_score >= min_score:
+                    matches.append(match)
         
         # 全案件の評価結果をCSVに保存
         self.save_all_evaluations_to_csv(all_evaluations)
@@ -153,7 +197,7 @@ class JobMatcher:
         # スコアで降順ソート
         matches.sort(key=lambda x: x.relevance_score, reverse=True)
         return matches[:max_jobs]
-    
+
     def save_matching_results(self, matches: List[JobMatch], user_profile: UserProfile):
         """マッチング結果をJSONファイルとして保存"""
         results = {
@@ -171,8 +215,6 @@ class JobMatcher:
                     "案件情報": match.job,
                     "マッチング詳細": {
                         "関連度スコア": match.relevance_score,
-                        "マッチする理由": match.match_reasons,
-                        "注意点": match.concerns
                     }
                 }
                 for match in matches
@@ -197,11 +239,8 @@ class JobMatcher:
             top_match = matches[0]
             logger.info(f"タイトル: {top_match.job['title']}")
             logger.info(f"関連度スコア: {top_match.relevance_score:.1f}")
-            logger.info("\nマッチする理由:")
-            for reason in top_match.match_reasons:
-                logger.info(f"- {reason}")
         
-        return output_file 
+        return output_file
 
     def save_all_evaluations_to_csv(self, evaluations: List[JobMatch]):
         """全案件の評価結果をCSVファイルとして保存"""
@@ -219,8 +258,6 @@ class JobMatcher:
                 '関連度スコア',
                 'クイックフィルタ',
                 'フィルタ理由',
-                'マッチング理由',
-                '注意点',
                 'URL'
             ])
             
@@ -234,8 +271,6 @@ class JobMatcher:
                     f"{eval.relevance_score:.1f}",
                     "除外" if eval.quick_filtered else "詳細評価",
                     eval.filter_reason,
-                    ' | '.join(eval.match_reasons),
-                    ' | '.join(eval.concerns),
                     eval.job['url']
                 ])
         
