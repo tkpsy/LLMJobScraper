@@ -1,47 +1,52 @@
-from scraping import get_html_content, extract_main_text, extract_keywords_with_llm
+from src.models.user_profile import UserProfile
+from src.scrapers.html_scraper import HTMLScraper
+from src.processors.job_extractor import JobExtractor
+from src.processors.job_matcher import JobMatcher
+from src.utils.config import MATCHING_CONFIG
+from src import logger
 
 def main():
-    """
-    プログラムのメイン処理。
-    ユーザーからURLとクエリを受け取り、WebスクレイピングとLLMによるキーワード抽出を実行します。
-    """
-    print("--- Web案件キーワード抽出サービス (MVP) ---")
-
-    # ユーザーからの入力
-    # target_url = input("分析したいWebページのURLを入力してください (例: https://www.lancers.jp/work/search/system/freelance?work_kind%5B%5D=1&amp;amp;work_kind%5B%5D=2&work_kind%5B%5D=3 ): ")
-    # user_skill_query = input("あなたのスキルや探している案件のタイプを自然言語で入力してください (例: Python開発、Webデザイン): ")
-
-    target_url = "https://crowdworks.jp/public/jobs/group/ai_machine_learning"
-    user_skill_query = "LLMエンジニア"
-
-    if not target_url:
-        print("URLが入力されていません。終了します。")
-        return
-    if not user_skill_query:
-        print("スキルクエリが入力されていません。終了します。")
-        return
-
-    print(f"\nURL: {target_url} からコンテンツを取得中...")
-    html_content = get_html_content(target_url)
-
-    if html_content:
-        print("HTMLコンテンツの取得に成功しました。主要テキストを抽出中...")
-        main_text = extract_main_text(html_content)
-
-        print(f"\nLLM(deepseek-chat)でキーワードを抽出中...")
-        llm_result = extract_keywords_with_llm(main_text, user_skill_query)
-
-        if llm_result:
-            print("\n--- 抽出結果 ---")
-            print(f"関連キーワード: {llm_result.get('relevant_keywords', 'N/A')}")
-            print(f"関連度スコア: {llm_result.get('relevance_score', 'N/A')}")
-            print(f"要約: {llm_result.get('summary', 'N/A')}")
-            print(f"ユーザー関連度が高い: {llm_result.get('is_relevant', 'N/A')}")
-            print("-----------------")
-        else:
-            print("LLMからのキーワード抽出に失敗しました。")
-    else:
-        print("Webページのコンテンツを取得できませんでした。")
+    try:
+        logger.info("スクレイピングを開始します...")
+        scraper = HTMLScraper()
+        html_files = scraper.save_html_multiple()
+        
+        logger.info("案件情報を抽出します...")
+        extractor = JobExtractor()
+        jobs = []
+        for html_file in html_files:
+            jobs.extend(extractor.extract_jobs(html_file))
+        
+        # 抽出した案件情報を保存
+        timestamp = html_files[0].stem.split('_')[-1]  # 最初のHTMLファイルのタイムスタンプを使用
+        jobs_file = extractor.save_jobs_to_json(jobs, timestamp)
+        logger.info(f"{len(jobs)}件の案件情報を抽出しました")
+        
+        # サンプルのユーザープロファイル
+        user_profile = UserProfile(
+            skills=["Python", "機械学習", "データ分析"],
+            experience_years=2,
+            preferred_categories=["AI・機械学習", "データサイエンス"],
+            preferred_work_type=["リモート"],
+            min_budget=3000,
+            description="機械学習エンジニアとして2年の経験があり、特にPythonを使用したデータ分析や機械学習モデルの開発を得意としています。"
+        )
+        
+        logger.info("案件のマッチング評価を開始します...")
+        matcher = JobMatcher()
+        matches = matcher.find_matching_jobs(
+            user_profile,
+            min_score=MATCHING_CONFIG["min_score"],
+            max_jobs=MATCHING_CONFIG["max_jobs"]
+        )
+        
+        # マッチング結果を保存
+        matcher.save_matching_results(matches, user_profile)
+        logger.info("処理が完了しました")
+        
+    except Exception as e:
+        logger.error(f"エラーが発生しました: {str(e)}", exc_info=True)
+        raise
 
 if __name__ == "__main__":
     main() 
