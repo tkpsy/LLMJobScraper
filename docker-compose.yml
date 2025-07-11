@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  llm-job-scraper:
+    build: .
+    container_name: llm-job-scraper
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    volumes:
+      # データの永続化
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # 設定ファイルの同期
+      - ./categories.json:/app/categories.json
+      - ./.env:/app/.env
+    working_dir: /app
+    tty: true
+    stdin_open: true
+    # 自動起動を無効化（手動でコンテナに入るため）
+    command: tail -f /dev/null 

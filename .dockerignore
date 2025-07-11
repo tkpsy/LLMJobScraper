@@ -1,0 +1,39 @@
+# Git関連
+.git/
+.gitignore
+
+# Python関連
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env.local
+.env.production
+
+# IDE関連
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# ログファイル
+logs/
+*.log
+
+# データファイル（必要に応じて）
+data/html/
+data/jobs/
+data/matches/
+
+# Docker関連
+Dockerfile
+docker-compose.yml
+.dockerignore 
