@@ -82,7 +82,7 @@ USER_PROFILE_CONFIG = {
 EXECUTION_CONFIG = {
     "save_detailed_logs": True,  # 詳細なログを保存するかどうか
     "save_screenshots": True,    # スクリーンショットを保存するかどうか
-    "max_pages_per_category": 1, # カテゴリごとの最大取得ページ数
+    "max_pages_per_category": 5, # カテゴリごとの最大取得ページ数（1=単一ページ, 2以上=複数ページ）
     "show_progress": True,       # 進捗表示を行うかどうか
     "auto_open_results": False,  # 結果ファイルを自動で開くかどうか
 }

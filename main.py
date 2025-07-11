@@ -113,7 +113,7 @@ class CrowdWorksCategoryExplorer:
             print("無効な入力です。")
             return None
     
-    def scrape_category_jobs(self, category_url: str) -> Optional[Path]:
+    def scrape_category_jobs(self, category_url: str) -> List[Path]:
         """指定されたカテゴリの案件をスクレイピング"""
         # スクレイピング設定を更新
         original_url = SCRAPING_CONFIG["base_url"]
@@ -122,46 +122,78 @@ class CrowdWorksCategoryExplorer:
         try:
             if OUTPUT_CONFIG["console_output"]:
                 print(f"カテゴリページをスクレイピング中: {category_url}")
-            html_file = self.html_scraper.save_html_single()
+            
+            # 複数ページ対応のチェック
+            max_pages = EXECUTION_CONFIG.get("max_pages_per_category", 1)
+            if max_pages > 1:
+                # 複数ページスクレイピング
+                html_files = self.html_scraper.save_html_with_pagination(
+                    category_url=category_url, 
+                    max_pages=max_pages
+                )
+            else:
+                # 従来の単一ページスクレイピング
+                html_file = self.html_scraper.save_html_single()
+                html_files = [html_file]
             
             # 保存されたファイルを記録
-            self.saved_files['html_files'].append(html_file)
+            self.saved_files['html_files'].extend(html_files)
             
             # スクリーンショットファイルも記録
             if EXECUTION_CONFIG["save_screenshots"]:
-                timestamp = html_file.stem.replace('page_', '')
-                screenshot_file = html_file.parent / f'screenshot_{timestamp}.png'
-                if screenshot_file.exists():
-                    self.saved_files['screenshot_files'].append(screenshot_file)
+                for html_file in html_files:
+                    timestamp = html_file.stem.replace('page_', '')
+                    screenshot_file = html_file.parent / f'screenshot_{timestamp}.png'
+                    if screenshot_file.exists():
+                        self.saved_files['screenshot_files'].append(screenshot_file)
             
-            return html_file
+            return html_files
         
         except Exception as e:
             print(f"スクレイピング中にエラーが発生しました: {e}")
-            return None
+            return []
         
         finally:
             # 設定を元に戻す
             SCRAPING_CONFIG["base_url"] = original_url
     
-    def extract_and_match_jobs(self, html_file: Path) -> List:
-        """案件を抽出してマッチング評価を行う"""
+    def extract_and_match_jobs(self, html_files: List[Path]) -> List:
+        """複数のHTMLファイルから案件を抽出してマッチング評価を行う"""
         if OUTPUT_CONFIG["console_output"]:
             print("案件情報を抽出中...")
-        jobs = self.job_extractor.extract_jobs(html_file)
         
-        if not jobs:
+        all_jobs = []
+        
+        # 複数のHTMLファイルから案件を抽出
+        for i, html_file in enumerate(html_files, 1):
+            if OUTPUT_CONFIG["console_output"]:
+                print(f"  ファイル {i}/{len(html_files)}: {html_file.name}")
+            
+            jobs = self.job_extractor.extract_jobs(html_file)
+            all_jobs.extend(jobs)
+            
+            if OUTPUT_CONFIG["console_output"]:
+                print(f"    抽出件数: {len(jobs)}件")
+        
+        # 重複案件の除去
+        unique_jobs = self._remove_duplicate_jobs(all_jobs)
+        
+        if OUTPUT_CONFIG["console_output"]:
+            print(f"合計抽出件数: {len(all_jobs)}件")
+            print(f"重複除去後: {len(unique_jobs)}件")
+        
+        if not unique_jobs:
             if OUTPUT_CONFIG["console_output"]:
                 print("案件が見つかりませんでした。")
             return []
         
         # 案件をJSONで保存
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        job_file = self.job_extractor.save_jobs_to_json(jobs, timestamp)
+        job_file = self.job_extractor.save_jobs_to_json(unique_jobs, timestamp)
         self.saved_files['job_files'].append(job_file)
         
         if OUTPUT_CONFIG["console_output"]:
-            print(f"抽出された案件数: {len(jobs)}件")
+            print(f"抽出された案件数: {len(unique_jobs)}件")
         
         # マッチング評価
         if OUTPUT_CONFIG["console_output"]:
@@ -180,6 +212,20 @@ class CrowdWorksCategoryExplorer:
                 self.saved_files['match_files'].append(latest_match_file)
         
         return matches
+    
+    def _remove_duplicate_jobs(self, jobs: List) -> List:
+        """重複案件を除去する"""
+        unique_jobs = []
+        seen_titles = set()
+        
+        for job in jobs:
+            # タイトルとクライアント名の組み合わせで重複チェック
+            job_key = (job.title, job.client_name)
+            if job_key not in seen_titles:
+                seen_titles.add(job_key)
+                unique_jobs.append(job)
+        
+        return unique_jobs
     
     def display_matches(self, matches: List) -> None:
         """マッチング結果を表示"""
@@ -318,12 +364,12 @@ class CrowdWorksCategoryExplorer:
                     print(f"📂 対象カテゴリ: {selected_category['name']}")
                 
                 # カテゴリページをスクレイピング
-                html_file = self.scrape_category_jobs(selected_category['url'])
-                if html_file is None:
+                html_files = self.scrape_category_jobs(selected_category['url'])
+                if not html_files:
                     continue
                 
                 # 案件抽出とマッチング
-                matches = self.extract_and_match_jobs(html_file)
+                matches = self.extract_and_match_jobs(html_files)
                 
                 # 結果表示
                 self.display_matches(matches)
@@ -367,12 +413,12 @@ class CrowdWorksCategoryExplorer:
                 print(f"\n選択されたカテゴリ: {selected_category['name']}")
                 
                 # カテゴリページをスクレイピング
-                html_file = self.scrape_category_jobs(selected_category['url'])
-                if html_file is None:
+                html_files = self.scrape_category_jobs(selected_category['url'])
+                if not html_files:
                     continue
                 
                 # 案件抽出とマッチング
-                matches = self.extract_and_match_jobs(html_file)
+                matches = self.extract_and_match_jobs(html_files)
                 
                 # 結果表示
                 self.display_matches(matches)
