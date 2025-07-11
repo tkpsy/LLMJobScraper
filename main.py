@@ -21,7 +21,7 @@ class CrowdWorksCategoryExplorer:
         self.html_scraper = HTMLScraper()
         self.job_extractor = JobExtractor()
         self.job_matcher = JobMatcher()
-        self.categories_file = Path("data/categories.json")
+        self.categories_file = Path("categories.json")
         self.auto_mode = auto_mode
         
         # セッション中に保存されたファイルを追跡

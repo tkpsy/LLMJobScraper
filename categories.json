@@ -1,0 +1,786 @@
+{
+  "main_categories": [
+    {
+      "name": "システム開発",
+      "url": "https://crowdworks.jp/public/jobs/group/development",
+      "id": "development",
+      "subcategories": [
+        {
+          "name": "Web開発・システム設計",
+          "url": "https://crowdworks.jp/public/jobs/category/241",
+          "id": "241"
+        },
+        {
+          "name": "保守・運用・更新",
+          "url": "https://crowdworks.jp/public/jobs/category/244",
+          "id": "244"
+        },
+        {
+          "name": "アプリケーション開発",
+          "url": "https://crowdworks.jp/public/jobs/category/269",
+          "id": "269"
+        }
+      ]
+    },
+    {
+      "name": "AI（人工知能）・機械学習",
+      "url": "https://crowdworks.jp/public/jobs/group/ai_machine_learning",
+      "id": "ai_machine_learning",
+      "subcategories": [
+        {
+          "name": "機械学習・ディープラーニング",
+          "url": "https://crowdworks.jp/public/jobs/category/364",
+          "id": "364"
+        },
+        {
+          "name": "ChatGPT開発",
+          "url": "https://crowdworks.jp/public/jobs/category/365",
+          "id": "365"
+        },
+        {
+          "name": "AI・チャットボット開発",
+          "url": "https://crowdworks.jp/public/jobs/category/283",
+          "id": "283"
+        },
+        {
+          "name": "AIアノテーション",
+          "url": "https://crowdworks.jp/public/jobs/category/366",
+          "id": "366"
+        }
+      ]
+    },
+    {
+      "name": "アプリ・スマートフォン開発",
+      "url": "https://crowdworks.jp/public/jobs/group/software_development",
+      "id": "software_development",
+      "subcategories": [
+        {
+          "name": "iPhone・iPadアプリ開発",
+          "url": "https://crowdworks.jp/public/jobs/category/3",
+          "id": "3"
+        },
+        {
+          "name": "Androidアプリ開発",
+          "url": "https://crowdworks.jp/public/jobs/category/4",
+          "id": "4"
+        },
+        {
+          "name": "スマートフォン アプリ開発・サイト構築",
+          "url": "https://crowdworks.jp/public/jobs/category/82",
+          "id": "82"
+        },
+        {
+          "name": "ソーシャルゲーム開発",
+          "url": "https://crowdworks.jp/public/jobs/category/6",
+          "id": "6"
+        },
+        {
+          "name": "Androidゲーム開発",
+          "url": "https://crowdworks.jp/public/jobs/category/174",
+          "id": "174"
+        },
+        {
+          "name": "iPhone・iPadゲーム開発",
+          "url": "https://crowdworks.jp/public/jobs/category/175",
+          "id": "175"
+        },
+        {
+          "name": "携帯アプリ・モバイルアプリ開発",
+          "url": "https://crowdworks.jp/public/jobs/category/81",
+          "id": "81"
+        }
+      ]
+    },
+    {
+      "name": "ホームページ制作・Webデザイン",
+      "url": "https://crowdworks.jp/public/jobs/group/web_products",
+      "id": "web_products",
+      "subcategories": [
+        {
+          "name": "ホームページ作成",
+          "url": "https://crowdworks.jp/public/jobs/category/14",
+          "id": "14"
+        },
+        {
+          "name": "ウェブデザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/15",
+          "id": "15"
+        },
+        {
+          "name": "WordPress制作・導入",
+          "url": "https://crowdworks.jp/public/jobs/category/20",
+          "id": "20"
+        },
+        {
+          "name": "ランディングページ（LP）制作",
+          "url": "https://crowdworks.jp/public/jobs/category/17",
+          "id": "17"
+        },
+        {
+          "name": "HTML・CSSコーディング",
+          "url": "https://crowdworks.jp/public/jobs/category/16",
+          "id": "16"
+        },
+        {
+          "name": "Webサイト修正・更新・機能追加",
+          "url": "https://crowdworks.jp/public/jobs/category/285",
+          "id": "285"
+        },
+        {
+          "name": "アイコン・ボタン・ヘッダー制作",
+          "url": "https://crowdworks.jp/public/jobs/category/286",
+          "id": "286"
+        },
+        {
+          "name": "CMS導入",
+          "url": "https://crowdworks.jp/public/jobs/category/7",
+          "id": "7"
+        },
+        {
+          "name": "モバイルサイト・スマートフォンサイト制作",
+          "url": "https://crowdworks.jp/public/jobs/category/87",
+          "id": "87"
+        },
+        {
+          "name": "UI/UX設計・デザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/77",
+          "id": "77"
+        },
+        {
+          "name": "インタラクションデザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/112",
+          "id": "112"
+        },
+        {
+          "name": "オウンドメディア制作",
+          "url": "https://crowdworks.jp/public/jobs/category/304",
+          "id": "304"
+        }
+      ]
+    },
+    {
+      "name": "ECサイト・ネットショップ構築",
+      "url": "https://crowdworks.jp/public/jobs/group/ec",
+      "id": "ec",
+      "subcategories": [
+        {
+          "name": "ECサイト制作",
+          "url": "https://crowdworks.jp/public/jobs/category/84",
+          "id": "84"
+        },
+        {
+          "name": "ECサイトデザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/137",
+          "id": "137"
+        },
+        {
+          "name": "ECサイト運用ツール開発",
+          "url": "https://crowdworks.jp/public/jobs/category/315",
+          "id": "315"
+        },
+        {
+          "name": "商品紹介文作成",
+          "url": "https://crowdworks.jp/public/jobs/category/316",
+          "id": "316"
+        },
+        {
+          "name": "ECコンサルティング",
+          "url": "https://crowdworks.jp/public/jobs/category/317",
+          "id": "317"
+        }
+      ]
+    },
+    {
+      "name": "デザイン",
+      "url": "https://crowdworks.jp/public/jobs/group/design",
+      "id": "design",
+      "subcategories": [
+        {
+          "name": "ロゴ・バナー・イラスト",
+          "url": "https://crowdworks.jp/public/jobs/category/231",
+          "id": "231"
+        },
+        {
+          "name": "印刷物・DTPデザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/232",
+          "id": "232"
+        },
+        {
+          "name": "キャラクター・アイコン・アニメ",
+          "url": "https://crowdworks.jp/public/jobs/category/256",
+          "id": "256"
+        },
+        {
+          "name": "地図・看板・インフォグラフィック",
+          "url": "https://crowdworks.jp/public/jobs/category/257",
+          "id": "257"
+        },
+        {
+          "name": "POP・メニュー・シール",
+          "url": "https://crowdworks.jp/public/jobs/category/258",
+          "id": "258"
+        },
+        {
+          "name": "CD・本",
+          "url": "https://crowdworks.jp/public/jobs/category/259",
+          "id": "259"
+        },
+        {
+          "name": "プロダクトデザイン",
+          "url": "https://crowdworks.jp/public/jobs/category/114",
+          "id": "114"
+        },
+        {
+          "name": "その他（デザイン）",
+          "url": "https://crowdworks.jp/public/jobs/category/33",
+          "id": "33"
+        }
+      ]
+    },
+    {
+      "name": "動画・映像・アニメーション",
+      "url": "https://crowdworks.jp/public/jobs/group/video_contents",
+      "id": "video_contents",
+      "subcategories": [
+        {
+          "name": "動画作成・動画制作",
+          "url": "https://crowdworks.jp/public/jobs/category/80",
+          "id": "80"
+        },
+        {
+          "name": "YouTube動画作成・編集",
+          "url": "https://crowdworks.jp/public/jobs/category/293",
+          "id": "293"
+        },
+        {
+          "name": "映像編集・映像制作",
+          "url": "https://crowdworks.jp/public/jobs/category/89",
+          "id": "89"
+        },
+        {
+          "name": "映像撮影",
+          "url": "https://crowdworks.jp/public/jobs/category/121",
+          "id": "121"
+        },
+        {
+          "name": "キャラクター・アニメーション制作",
+          "url": "https://crowdworks.jp/public/jobs/category/294",
+          "id": "294"
+        },
+        {
+          "name": "AR/VRコンテンツ制作・撮影",
+          "url": "https://crowdworks.jp/public/jobs/category/295",
+          "id": "295"
+        },
+        {
+          "name": "TikTok・短尺動画",
+          "url": "https://crowdworks.jp/public/jobs/category/300",
+          "id": "300"
+        },
+        {
+          "name": "広告動画",
+          "url": "https://crowdworks.jp/public/jobs/category/308",
+          "id": "308"
+        },
+        {
+          "name": "結婚式・イベント動画",
+          "url": "https://crowdworks.jp/public/jobs/category/309",
+          "id": "309"
+        },
+        {
+          "name": "ミュージックビデオ（MV）・歌ってみた動画",
+          "url": "https://crowdworks.jp/public/jobs/category/310",
+          "id": "310"
+        },
+        {
+          "name": "モーショングラフィックス",
+          "url": "https://crowdworks.jp/public/jobs/category/321",
+          "id": "321"
+        },
+        {
+          "name": "キャラクターアニメーション",
+          "url": "https://crowdworks.jp/public/jobs/category/322",
+          "id": "322"
+        },
+        {
+          "name": "CM・PV・ドラマ制作",
+          "url": "https://crowdworks.jp/public/jobs/category/323",
+          "id": "323"
+        },
+        {
+          "name": "企業紹介・講習・PR動画制作",
+          "url": "https://crowdworks.jp/public/jobs/category/324",
+          "id": "324"
+        },
+        {
+          "name": "動画シナリオ・台本・構成作成",
+          "url": "https://crowdworks.jp/public/jobs/category/358",
+          "id": "358"
+        }
+      ]
+    },
+    {
+      "name": "音楽・音響・ナレーション",
+      "url": "https://crowdworks.jp/public/jobs/group/sounds",
+      "id": "sounds",
+      "subcategories": [
+        {
+          "name": "声優・ナレーション制作",
+          "url": "https://crowdworks.jp/public/jobs/category/265",
+          "id": "265"
+        },
+        {
+          "name": "作曲・音源・効果音",
+          "url": "https://crowdworks.jp/public/jobs/category/266",
+          "id": "266"
+        },
+        {
+          "name": "音声制作",
+          "url": "https://crowdworks.jp/public/jobs/category/123",
+          "id": "123"
+        },
+        {
+          "name": "BGM制作",
+          "url": "https://crowdworks.jp/public/jobs/category/264",
+          "id": "264"
+        },
+        {
+          "name": "楽譜作成",
+          "url": "https://crowdworks.jp/public/jobs/category/301",
+          "id": "301"
+        },
+        {
+          "name": "歌唱・仮歌",
+          "url": "https://crowdworks.jp/public/jobs/category/313",
+          "id": "313"
+        },
+        {
+          "name": "楽器演奏",
+          "url": "https://crowdworks.jp/public/jobs/category/314",
+          "id": "314"
+        },
+        {
+          "name": "ボカロ制作",
+          "url": "https://crowdworks.jp/public/jobs/category/357",
+          "id": "357"
+        }
+      ]
+    },
+    {
+      "name": "ビジネス・マーケティング・企画",
+      "url": "https://crowdworks.jp/public/jobs/group/business",
+      "id": "business",
+      "subcategories": [
+        {
+          "name": "ビジネスサポート",
+          "url": "https://crowdworks.jp/public/jobs/category/237",
+          "id": "237"
+        },
+        {
+          "name": "リサーチ・分析・解析",
+          "url": "https://crowdworks.jp/public/jobs/category/240",
+          "id": "240"
+        },
+        {
+          "name": "WEBマーケティング・集客・SEM",
+          "url": "https://crowdworks.jp/public/jobs/category/234",
+          "id": "234"
+        },
+        {
+          "name": "営業・広告・PR",
+          "url": "https://crowdworks.jp/public/jobs/category/239",
+          "id": "239"
+        },
+        {
+          "name": "コンサルティング",
+          "url": "https://crowdworks.jp/public/jobs/category/236",
+          "id": "236"
+        },
+        {
+          "name": "セミナー・ウェビナー・イベント企画",
+          "url": "https://crowdworks.jp/public/jobs/category/305",
+          "id": "305"
+        }
+      ]
+    },
+    {
+      "name": "ライティング・記事作成",
+      "url": "https://crowdworks.jp/public/jobs/group/writing_beginner",
+      "id": "writing_beginner",
+      "subcategories": [
+        {
+          "name": "キャッチフレーズ・コピーライティング",
+          "url": "https://crowdworks.jp/public/jobs/category/35",
+          "id": "35"
+        },
+        {
+          "name": "名前募集",
+          "url": "https://crowdworks.jp/public/jobs/category/125",
+          "id": "125"
+        },
+        {
+          "name": "オウンドメディア・ブログ記事作成",
+          "url": "https://crowdworks.jp/public/jobs/category/36",
+          "id": "36"
+        },
+        {
+          "name": "レビュー・口コミ",
+          "url": "https://crowdworks.jp/public/jobs/category/56",
+          "id": "56"
+        },
+        {
+          "name": "記事・Webコンテンツ作成",
+          "url": "https://crowdworks.jp/public/jobs/category/37",
+          "id": "37"
+        },
+        {
+          "name": "文書作成",
+          "url": "https://crowdworks.jp/public/jobs/category/101",
+          "id": "101"
+        },
+        {
+          "name": "編集・校正・リライト",
+          "url": "https://crowdworks.jp/public/jobs/category/40",
+          "id": "40"
+        },
+        {
+          "name": "セールスコピー・セールスレター",
+          "url": "https://crowdworks.jp/public/jobs/category/127",
+          "id": "127"
+        },
+        {
+          "name": "シナリオ作成・脚本制作・小説作成",
+          "url": "https://crowdworks.jp/public/jobs/category/287",
+          "id": "287"
+        },
+        {
+          "name": "インタビュー・取材記事作成",
+          "url": "https://crowdworks.jp/public/jobs/category/288",
+          "id": "288"
+        },
+        {
+          "name": "書籍編集・雑誌編集",
+          "url": "https://crowdworks.jp/public/jobs/category/289",
+          "id": "289"
+        },
+        {
+          "name": "メルマガ・DM作成",
+          "url": "https://crowdworks.jp/public/jobs/category/38",
+          "id": "38"
+        },
+        {
+          "name": "その他（ライティング）",
+          "url": "https://crowdworks.jp/public/jobs/category/41",
+          "id": "41"
+        },
+        {
+          "name": "SEOライティング",
+          "url": "https://crowdworks.jp/public/jobs/category/318",
+          "id": "318"
+        },
+        {
+          "name": "求人原稿作成",
+          "url": "https://crowdworks.jp/public/jobs/category/319",
+          "id": "319"
+        },
+        {
+          "name": "英文ライティング",
+          "url": "https://crowdworks.jp/public/jobs/category/320",
+          "id": "320"
+        }
+      ]
+    },
+    {
+      "name": "事務・カンタン作業",
+      "url": "https://crowdworks.jp/public/jobs/group/task",
+      "id": "task",
+      "subcategories": [
+        {
+          "name": "質問・アンケート・テスト",
+          "url": "https://crowdworks.jp/public/jobs/category/250",
+          "id": "250"
+        },
+        {
+          "name": "データ作成・入力",
+          "url": "https://crowdworks.jp/public/jobs/category/249",
+          "id": "249"
+        },
+        {
+          "name": "内職・軽作業",
+          "url": "https://crowdworks.jp/public/jobs/category/251",
+          "id": "251"
+        },
+        {
+          "name": "各種代行",
+          "url": "https://crowdworks.jp/public/jobs/category/252",
+          "id": "252"
+        },
+        {
+          "name": "写真・動画",
+          "url": "https://crowdworks.jp/public/jobs/category/122",
+          "id": "122"
+        },
+        {
+          "name": "データ分類・カテゴリ分け",
+          "url": "https://crowdworks.jp/public/jobs/category/103",
+          "id": "103"
+        },
+        {
+          "name": "その他（カンタン作業）",
+          "url": "https://crowdworks.jp/public/jobs/category/58",
+          "id": "58"
+        }
+      ]
+    },
+    {
+      "name": "写真・画像",
+      "url": "https://crowdworks.jp/public/jobs/group/multimedia",
+      "id": "multimedia",
+      "subcategories": [
+        {
+          "name": "画像加工",
+          "url": "https://crowdworks.jp/public/jobs/category/57",
+          "id": "57"
+        },
+        {
+          "name": "写真撮影",
+          "url": "https://crowdworks.jp/public/jobs/category/109",
+          "id": "109"
+        },
+        {
+          "name": "写真加工・写真編集",
+          "url": "https://crowdworks.jp/public/jobs/category/79",
+          "id": "79"
+        },
+        {
+          "name": "Flash制作",
+          "url": "https://crowdworks.jp/public/jobs/category/22",
+          "id": "22"
+        }
+      ]
+    },
+    {
+      "name": "3D-CG制作",
+      "url": "https://crowdworks.jp/public/jobs/group/3dcg",
+      "id": "3dcg",
+      "subcategories": [
+        {
+          "name": "3D-CAD制作・モデリング",
+          "url": "https://crowdworks.jp/public/jobs/category/261",
+          "id": "261"
+        },
+        {
+          "name": "建築設計・CAD・パース作成",
+          "url": "https://crowdworks.jp/public/jobs/category/193",
+          "id": "193"
+        },
+        {
+          "name": "VTuber・3Dアニメーション作成",
+          "url": "https://crowdworks.jp/public/jobs/category/262",
+          "id": "262"
+        },
+        {
+          "name": "3Dプリンター用データ作成",
+          "url": "https://crowdworks.jp/public/jobs/category/111",
+          "id": "111"
+        },
+        {
+          "name": "アバター制作",
+          "url": "https://crowdworks.jp/public/jobs/category/356",
+          "id": "356"
+        }
+      ]
+    },
+    {
+      "name": "ネーミング・アイデア",
+      "url": "https://crowdworks.jp/public/jobs/group/idea",
+      "id": "idea",
+      "subcategories": [
+        {
+          "name": "ネーミング募集",
+          "url": "https://crowdworks.jp/public/jobs/category/34",
+          "id": "34"
+        },
+        {
+          "name": "キャッチコピー・コピーライティング",
+          "url": "https://crowdworks.jp/public/jobs/category/126",
+          "id": "126"
+        },
+        {
+          "name": "企画・プロモアイデア募集",
+          "url": "https://crowdworks.jp/public/jobs/category/168",
+          "id": "168"
+        },
+        {
+          "name": "商品企画",
+          "url": "https://crowdworks.jp/public/jobs/category/169",
+          "id": "169"
+        }
+      ]
+    },
+    {
+      "name": "翻訳・通訳サービス",
+      "url": "https://crowdworks.jp/public/jobs/group/translation_and_interpretation",
+      "id": "translation_and_interpretation",
+      "subcategories": [
+        {
+          "name": "翻訳・通訳",
+          "url": "https://crowdworks.jp/public/jobs/category/39",
+          "id": "39"
+        },
+        {
+          "name": "英語通訳・英文翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/154",
+          "id": "154"
+        },
+        {
+          "name": "中国語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/155",
+          "id": "155"
+        },
+        {
+          "name": "フランス語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/157",
+          "id": "157"
+        },
+        {
+          "name": "韓国語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/156",
+          "id": "156"
+        },
+        {
+          "name": "ドイツ語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/158",
+          "id": "158"
+        },
+        {
+          "name": "タイ語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/163",
+          "id": "163"
+        },
+        {
+          "name": "スペイン語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/160",
+          "id": "160"
+        },
+        {
+          "name": "イタリア語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/159",
+          "id": "159"
+        },
+        {
+          "name": "ポルトガル語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/161",
+          "id": "161"
+        },
+        {
+          "name": "ロシア語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/162",
+          "id": "162"
+        },
+        {
+          "name": "アラビア語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/165",
+          "id": "165"
+        },
+        {
+          "name": "タガログ語翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/164",
+          "id": "164"
+        },
+        {
+          "name": "同時通訳・電話通訳",
+          "url": "https://crowdworks.jp/public/jobs/category/166",
+          "id": "166"
+        },
+        {
+          "name": "映像翻訳・メディア翻訳・出版翻訳",
+          "url": "https://crowdworks.jp/public/jobs/category/153",
+          "id": "153"
+        },
+        {
+          "name": "海外コールセンター",
+          "url": "https://crowdworks.jp/public/jobs/category/167",
+          "id": "167"
+        }
+      ]
+    },
+    {
+      "name": "製品設計・開発",
+      "url": "https://crowdworks.jp/public/jobs/group/hardware_development",
+      "id": "hardware_development",
+      "subcategories": [
+        {
+          "name": "回路設計・組み込みソフト開発",
+          "url": "https://crowdworks.jp/public/jobs/category/272",
+          "id": "272"
+        },
+        {
+          "name": "ハードウェア機構設計・機械設計",
+          "url": "https://crowdworks.jp/public/jobs/category/176",
+          "id": "176"
+        },
+        {
+          "name": "CAE（解析・シミュレーション）",
+          "url": "https://crowdworks.jp/public/jobs/category/298",
+          "id": "298"
+        }
+      ]
+    },
+    {
+      "name": "相談アドバイス・暮らし・社会",
+      "url": "https://crowdworks.jp/public/jobs/group/living",
+      "id": "living",
+      "subcategories": [
+        {
+          "name": "ビジネス・財務会計・知財",
+          "url": "https://crowdworks.jp/public/jobs/category/61",
+          "id": "61"
+        },
+        {
+          "name": "マネー・ライフプラン",
+          "url": "https://crowdworks.jp/public/jobs/category/245",
+          "id": "245"
+        },
+        {
+          "name": "建築・不動産",
+          "url": "https://crowdworks.jp/public/jobs/category/246",
+          "id": "246"
+        },
+        {
+          "name": "相談・講師・アドバイス",
+          "url": "https://crowdworks.jp/public/jobs/category/299",
+          "id": "299"
+        }
+      ]
+    },
+    {
+      "name": "プロジェクト・保守運用メンバー募集",
+      "url": "https://crowdworks.jp/public/jobs/group/parttime_system_operations",
+      "id": "parttime_system_operations",
+      "subcategories": [
+        {
+          "name": "開発（時間単価制）",
+          "url": "https://crowdworks.jp/public/jobs/category/274",
+          "id": "274"
+        },
+        {
+          "name": "事務（時間単価制）",
+          "url": "https://crowdworks.jp/public/jobs/category/277",
+          "id": "277"
+        },
+        {
+          "name": "ライティング（時間単価制）",
+          "url": "https://crowdworks.jp/public/jobs/category/276",
+          "id": "276"
+        },
+        {
+          "name": "デザイン（時間単価制）",
+          "url": "https://crowdworks.jp/public/jobs/category/275",
+          "id": "275"
+        }
+      ]
+    }
+  ],
+  "updated_at": "2025-07-11 16:49:52"
+}
