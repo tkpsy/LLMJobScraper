@@ -57,15 +57,10 @@ AUTO_EXECUTION_CONFIG = {
         #     "main_category": "システム開発",
         #     "subcategory": "Web開発・システム設計",
         #     "description": "Web開発案件を取得"
-        # },
-        # {
-        #     "main_category": "ホームページ制作・Webデザイン",
-        #     "subcategory": None,
-        #     "description": "Webデザイン全般の案件を取得"
         # }
     ],
     "continuous_execution": False,  # 全カテゴリを連続実行するかどうか
-    "delay_between_categories": 10,  # カテゴリ間の待機時間（秒）
+    "delay_between_categories": 5,  # カテゴリ間の待機時間（秒）
 }
 
 # ユーザープロファイル設定

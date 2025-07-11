@@ -17,12 +17,11 @@ from src.utils.config import (
 class CrowdWorksCategoryExplorer:
     """カテゴリベースのCrowdWorks案件探索システム"""
     
-    def __init__(self, auto_mode: bool = False):
+    def __init__(self):
         self.html_scraper = HTMLScraper()
         self.job_extractor = JobExtractor()
         self.job_matcher = JobMatcher()
         self.categories_file = Path("categories.json")
-        self.auto_mode = auto_mode
         
         # セッション中に保存されたファイルを追跡
         self.saved_files = {
@@ -63,55 +62,6 @@ class CrowdWorksCategoryExplorer:
                         if subcategory["name"] == subcategory_name:
                             return subcategory
         return None
-    
-    def display_categories(self, categories: Dict) -> None:
-        """カテゴリを表示"""
-        print("\n利用可能なカテゴリ:")
-        print("=" * 40)
-        
-        for i, category in enumerate(categories.get("main_categories", []), 1):
-            print(f"{i}. {category['name']}")
-            if category.get('subcategories'):
-                for j, sub in enumerate(category['subcategories'][:3], 1):  # 最初の3つのサブカテゴリを表示
-                    print(f"   {j}. {sub['name']}")
-                if len(category['subcategories']) > 3:
-                    print(f"   ... 他{len(category['subcategories']) - 3}件")
-            print()
-    
-    def select_category(self, categories: Dict) -> Optional[Dict]:
-        """ユーザーにカテゴリを選択させる（手動モード用）"""
-        self.display_categories(categories)
-        
-        try:
-            choice = int(input("探索したいカテゴリの番号を入力してください (0で終了): "))
-            if choice == 0:
-                return None
-            
-            main_categories = categories.get("main_categories", [])
-            if 1 <= choice <= len(main_categories):
-                selected = main_categories[choice - 1]
-                
-                # サブカテゴリがある場合は選択を促す
-                if selected.get('subcategories'):
-                    print(f"\n{selected['name']} のサブカテゴリ:")
-                    print("0. メインカテゴリ全体")
-                    for i, sub in enumerate(selected['subcategories'], 1):
-                        print(f"{i}. {sub['name']}")
-                    
-                    sub_choice = int(input("サブカテゴリを選択してください: "))
-                    if sub_choice == 0:
-                        return selected
-                    elif 1 <= sub_choice <= len(selected['subcategories']):
-                        return selected['subcategories'][sub_choice - 1]
-                
-                return selected
-            else:
-                print("無効な選択です。")
-                return None
-        
-        except (ValueError, IndexError):
-            print("無効な入力です。")
-            return None
     
     def scrape_category_jobs(self, category_url: str) -> List[Path]:
         """指定されたカテゴリの案件をスクレイピング"""
@@ -203,6 +153,19 @@ class CrowdWorksCategoryExplorer:
             min_score=MATCHING_CONFIG["min_score"],
             max_jobs=MATCHING_CONFIG["max_jobs"]
         )
+        
+        # 推薦案件をJSONで保存
+        if matches:
+            try:
+                matching_result_file = self.job_matcher.save_matching_results(matches, self.user_profile)
+                self.saved_files['match_files'].append(matching_result_file)
+                
+                if OUTPUT_CONFIG["console_output"]:
+                    print(f"推薦案件を {matching_result_file} に保存しました。")
+                    
+            except Exception as e:
+                if OUTPUT_CONFIG["console_output"]:
+                    print(f"推薦案件の保存中にエラーが発生しました: {e}")
         
         # マッチング結果のCSVファイルを記録
         match_files = list(Path("data/matches").glob("all_evaluations_*.csv"))
@@ -331,10 +294,10 @@ class CrowdWorksCategoryExplorer:
         print("   - CSVファイル: Excelやスプレッドシートで開いて分析できます")
         print("=" * 60)
     
-    def run_auto_mode(self):
+    def run(self):
         """自動実行モード"""
         if OUTPUT_CONFIG["console_output"]:
-            print("CrowdWorks カテゴリベース案件探索システム（自動実行モード）")
+            print("CrowdWorks カテゴリベース案件探索システム")
             print("=" * 60)
         
         # カテゴリ情報を読み込み
@@ -391,72 +354,10 @@ class CrowdWorksCategoryExplorer:
             self.display_saved_files_summary()
             if OUTPUT_CONFIG["console_output"]:
                 print("\nお疲れ様でした！")
-    
-    def run_manual_mode(self):
-        """手動実行モード"""
-        print("CrowdWorks カテゴリベース案件探索システム（手動モード）")
-        print("=" * 50)
-        
-        # カテゴリ情報を読み込み
-        categories = self.load_categories()
-        if not categories:
-            return
-        
-        try:
-            while True:
-                # カテゴリ選択
-                selected_category = self.select_category(categories)
-                if selected_category is None:
-                    print("システムを終了します。")
-                    break
-                
-                print(f"\n選択されたカテゴリ: {selected_category['name']}")
-                
-                # カテゴリページをスクレイピング
-                html_files = self.scrape_category_jobs(selected_category['url'])
-                if not html_files:
-                    continue
-                
-                # 案件抽出とマッチング
-                matches = self.extract_and_match_jobs(html_files)
-                
-                # 結果表示
-                self.display_matches(matches)
-                
-                # 継続確認
-                continue_choice = input("\n別のカテゴリを探索しますか？ (y/n): ").lower()
-                if continue_choice != 'y':
-                    break
-        
-        except KeyboardInterrupt:
-            print("\n\n⚠️  プログラムが中断されました。")
-        
-        finally:
-            # 保存されたファイルの情報を表示
-            self.display_saved_files_summary()
-            print("\nお疲れ様でした！")
-    
-    def run(self):
-        """メインの実行ループ"""
-        if self.auto_mode or AUTO_EXECUTION_CONFIG["enabled"]:
-            self.run_auto_mode()
-        else:
-            self.run_manual_mode()
 
 def main():
-    """メイン関数 - コマンドライン引数をサポート"""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='CrowdWorks案件探索システム')
-    parser.add_argument('--auto', action='store_true', help='自動実行モードで起動')
-    parser.add_argument('--manual', action='store_true', help='手動実行モードで起動')
-    
-    args = parser.parse_args()
-    
-    # 自動実行モードの判定
-    auto_mode = args.auto or (AUTO_EXECUTION_CONFIG["enabled"] and not args.manual)
-    
-    explorer = CrowdWorksCategoryExplorer(auto_mode=auto_mode)
+    """メイン関数"""
+    explorer = CrowdWorksCategoryExplorer()
     explorer.run()
 
 if __name__ == "__main__":
