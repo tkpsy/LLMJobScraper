@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     ca-certificates \
+    curl \
+    net-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリの設定
@@ -19,11 +21,20 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN playwright install chromium
 RUN playwright install-deps
 
+# Ollamaのインストール（ローカルLLM用）
+RUN curl -fsSL https://ollama.ai/install.sh | sh
+
 # アプリケーションコードをコピー
 COPY . .
 
 # データディレクトリを作成
 RUN mkdir -p data/html data/jobs data/matches logs
 
-# デフォルトコマンド
-CMD ["python", "main.py"] 
+# 設定ファイルの初期化
+RUN touch web_config.json
+
+# ポート8000を公開（Webサーバー用）
+EXPOSE 8000
+
+# デフォルトコマンド（bashを起動）
+CMD ["bash"] 

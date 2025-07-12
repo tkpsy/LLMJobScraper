@@ -36,4 +36,6 @@ data/matches/
 # Docker関連
 Dockerfile
 docker-compose.yml
-.dockerignore 
+.dockerignore
+
+# 注意: web_config.jsonは除外しない（設定ファイルとして必要） 

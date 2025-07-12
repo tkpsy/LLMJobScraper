@@ -1018,4 +1018,10 @@ if __name__ == "__main__":
     import uvicorn
     print("🚀 シンプルWebサーバーを起動中...")
     print("📱 http://localhost:8000 にアクセスしてください")
-    uvicorn.run(app, host="127.0.0.1", port=8000) 
+    print("🌐 Docker環境では http://0.0.0.0:8000 でリッスンしています")
+    uvicorn.run(
+        app, 
+        host="0.0.0.0", 
+        port=8000,
+        log_level="info"
+    ) 

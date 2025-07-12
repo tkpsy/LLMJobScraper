@@ -1,18 +1,23 @@
+version: '3.8'
+
 services:
+  # メインアプリケーション
   llm-job-scraper:
     build: .
     container_name: llm-job-scraper
+    ports:
+      - "8000:8000"  # Webサーバーのポート
     environment:
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
     volumes:
       # データの永続化
       - ./data:/app/data
       - ./logs:/app/logs
       # 設定ファイルの同期
-      - ./categories.json:/app/categories.json
+      - ./web_config.json:/app/web_config.json
       - ./.env:/app/.env
     working_dir: /app
     tty: true
     stdin_open: true
-    # 自動起動を無効化（手動でコンテナに入るため）
+    # 手動でコマンドを実行するため、bashを起動
     command: tail -f /dev/null 
