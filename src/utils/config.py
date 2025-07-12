@@ -34,6 +34,7 @@ MATCHING_CONFIG = {
 }
 
 
+
 # LLMカテゴリ選択設定
 LLM_CATEGORY_SELECTION_CONFIG = {
     "enabled": True,
@@ -45,6 +46,7 @@ LLM_CATEGORY_SELECTION_CONFIG = {
 }
 
 
+
 # ユーザープロファイル設定
 USER_PROFILE_CONFIG = {
     "skills": ['Figma'],
@@ -52,6 +54,7 @@ USER_PROFILE_CONFIG = {
     "preferred_work_type": ['リモート'],
     "description": "FigmaやAdobeを使ってwebなどのデザインができます",
 }
+
 
 
 # 実行オプション設定
