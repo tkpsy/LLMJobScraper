@@ -28,8 +28,10 @@ SCRAPING_CONFIG = {
 # マッチング設定
 MATCHING_CONFIG = {
     "min_score": 80,
-    "max_jobs": 3,
-    "llm_model": "deepseek-chat",
+    "max_jobs": 20,
+    "batch_size": 10,
+    "llm_type": "local",
+    "llm_model": "elyza:jp8b",
     "temperature": 0.2,
 }
 
@@ -37,13 +39,18 @@ MATCHING_CONFIG = {
 
 # LLMカテゴリ選択設定
 LLM_CATEGORY_SELECTION_CONFIG = {
-    "enabled": True,
     "max_categories": 2,
     "min_relevance_score": 8,
-    "llm_model": "deepseek-chat",
+    "llm_type": "local",
+    "llm_model": "elyza:jp8b",
     "temperature": 0.2,
     "max_tokens": 1000,
 }
+
+
+
+
+
 
 
 
@@ -54,6 +61,11 @@ USER_PROFILE_CONFIG = {
     "preferred_work_type": ['リモート'],
     "description": "FigmaやAdobeを使ってwebなどのデザインができます",
 }
+
+
+
+
+
 
 
 

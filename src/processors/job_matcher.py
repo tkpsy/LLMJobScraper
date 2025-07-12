@@ -7,6 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from tqdm import tqdm
 from ..models.user_profile import UserProfile
+from src.utils.config import MATCHING_CONFIG
 from api import get_client, generate_chat_completion
 from openai import OpenAI
 from ..utils.logger import setup_logger
@@ -22,15 +23,18 @@ class JobMatch:
     quick_filtered: bool = False  # クイックフィルタリングで除外されたかどうか
     filter_reason: str = ""  # フィルタリングされた理由
 
-BATCH_SIZE = 3  # 一度に評価する案件数
-
 class JobMatcher:
-    """案件とユーザーのマッチングを行うクラス"""
+    """案件マッチングクラス"""
     
     def __init__(self, save_dir: str = "data/matches"):
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
-        self.client = get_client("local")  # LocalLLMを使用するように変更
+        self.jobs = []
+        # 設定からLLMタイプを取得してクライアントを初期化
+        llm_type = MATCHING_CONFIG.get("llm_type", "local")
+        self.client = get_client(llm_type)
+        # 設定からbatch_sizeを取得
+        self.batch_size = MATCHING_CONFIG.get("batch_size", 3)
 
     def quick_filter_job(self, job: Dict, user_profile: UserProfile) -> Tuple[bool, str]:
         """基本的な条件でジョブをフィルタリング
@@ -172,7 +176,7 @@ class JobMatcher:
             batch_jobs.append(job)
             
             # バッチサイズに達したら評価実行
-            if len(batch_jobs) >= BATCH_SIZE:
+            if len(batch_jobs) >= self.batch_size:
                 batch_matches = self.evaluate_jobs_batch(batch_jobs, user_profile)
                 for match in batch_matches:
                     all_evaluations.append(match)

@@ -46,14 +46,16 @@ def get_default_config():
             "description": "AI・機械学習分野でのフリーランス案件を探しています。特にChatGPT、LLM、深層学習関連の案件に興味があります。Python、TensorFlow、PyTorchを使った開発経験があります。また，Next.jsなどを利用したフロントエンドやバックエンドの開発経験があります。"
         },
         "llm_settings": {
-            "model": "deepseek-chat",
-            "temperature": 0.1,
+            "type": "local",
+            "model": "elyza:jp8b",
+            "temperature": 0.2,
             "max_categories": 3,
             "min_relevance_score": 7.0
         },
         "matching_settings": {
-            "min_score": 70.0,
-            "max_jobs": 5
+            "min_score": 80.0,
+            "max_jobs": 20,
+            "batch_size": 10
         }
     }
 
@@ -349,6 +351,17 @@ async def home():
 
         <div id="settings-tab" class="tab-content">
             <h2>設定</h2>
+            
+            <div style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <h4 style="margin-top: 0; color: #007bff;">💡 設定の説明</h4>
+                <p style="margin-bottom: 10px;"><strong>カテゴリ選択の閾値:</strong> LLMがあなたのスキルに基づいてカテゴリを選択する際の厳選度（0-10点）</p>
+                <p style="margin-bottom: 10px;"><strong>案件推薦の閾値:</strong> 個別の案件があなたに合致するかの判定基準（0-100点）</p>
+                <p style="margin-bottom: 10px;"><strong>LLM創造性レベル:</strong> AIの応答の創造性を制御（0.0=一貫性重視、2.0=創造性重視）</p>
+                <p style="margin-bottom: 10px;"><strong>検索対象カテゴリ数:</strong> あなたのスキルに基づいて検索するカテゴリの最大数</p>
+                <p style="margin-bottom: 10px;"><strong>最大案件数:</strong> 推薦する案件の最大数。多いほど多くの案件が表示されます</p>
+                <p style="margin-bottom: 0;"><strong>バッチ処理サイズ:</strong> 一度にLLMに渡す案件数。大きくしすぎると精度が落ちる可能性があります。</p>
+            </div>
+            
             <div id="settingsContent">
                 <form id="settingsForm">
                     <div class="form-group">
@@ -367,33 +380,57 @@ async def home():
                         <label for="userDescription">自己紹介:</label>
                         <textarea id="userDescription" class="form-control" rows="5" placeholder="あなたのスキルや経験について説明してください..."></textarea>
                     </div>
+                    
+                    <h3 style="margin-top: 30px; margin-bottom: 15px; color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 5px;">🤖 LLM設定</h3>
+                    
+                    <div class="form-group">
+                        <label for="llmType">LLMタイプ:</label>
+                        <select id="llmType" class="form-control" onchange="updateModelOptions()">
+                            <option value="local">Local (Ollama)</option>
+                            <option value="deepseek">DeepSeek API</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="llmModel">LLMモデル:</label>
                         <select id="llmModel" class="form-control">
+                            <option value="elyza:jp8b">Elyza JP8B (Local)</option>
                             <option value="deepseek-chat">DeepSeek Chat</option>
                             <option value="gpt-4">GPT-4</option>
                             <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="llmTemperature">LLM温度:</label>
+                        <label for="llmTemperature">LLM創造性レベル:</label>
                         <input type="number" id="llmTemperature" class="form-control" value="0.1" step="0.1" min="0" max="2">
+                        <small class="form-text text-muted">AIの応答の創造性を制御（0.0=一貫性重視、2.0=創造性重視）。低い値ほど安定した結果が得られます。</small>
                     </div>
                     <div class="form-group">
-                        <label for="maxCategories">最大カテゴリ数:</label>
+                        <label for="maxCategories">検索対象カテゴリ数:</label>
                         <input type="number" id="maxCategories" class="form-control" value="3" min="1" max="10">
+                        <small class="form-text text-muted">あなたのスキルに基づいて検索するカテゴリの最大数。多いほど幅広い案件が見つかりますが、処理時間が長くなります。</small>
                     </div>
+                    
+                    <h3 style="margin-top: 30px; margin-bottom: 15px; color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 5px;">🎯 フィルタリング設定</h3>
+                    
                     <div class="form-group">
-                        <label for="minRelevanceScore">最小関連度スコア:</label>
+                        <label for="minRelevanceScore">カテゴリ選択の閾値 (0-10点):</label>
                         <input type="number" id="minRelevanceScore" class="form-control" value="7.0" step="0.5" min="0" max="10">
+                        <small class="form-text text-muted">LLMがカテゴリを選択する際の関連度スコアの最小値。高いほど厳選されたカテゴリのみが選択されます。</small>
                     </div>
                     <div class="form-group">
-                        <label for="minScore">最小マッチングスコア:</label>
+                        <label for="minScore">案件推薦の閾値 (0-100点):</label>
                         <input type="number" id="minScore" class="form-control" value="70.0" step="5" min="0" max="100">
+                        <small class="form-text text-muted">個別案件のマッチングスコアの最小値。高いほど厳選された案件のみが推薦されます。</small>
                     </div>
                     <div class="form-group">
                         <label for="maxJobs">最大案件数:</label>
                         <input type="number" id="maxJobs" class="form-control" value="5" min="1" max="20">
+                        <small class="form-text text-muted">推薦する案件の最大数。多いほど多くの案件が表示されますが、関連性の低い案件も含まれる可能性があります。</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="batchSize">バッチ処理サイズ:</label>
+                        <input type="number" id="batchSize" class="form-control" value="3" min="1" max="10">
+                        <small class="form-text text-muted">一度にLLMに渡す案件数。大きくしすぎると精度が落ちる可能性があります。</small>
                     </div>
                     <button type="submit" class="btn btn-primary">設定を保存</button>
                 </form>
@@ -408,6 +445,7 @@ async def home():
             document.addEventListener('DOMContentLoaded', function() {
                 loadSettings();
                 loadAllResults(); // 結果履歴も読み込む
+                updateModelOptions(); // LLMタイプに応じてモデルオプションを初期化
             });
             
             function showTab(tabName) {
@@ -442,12 +480,14 @@ async def home():
                         document.getElementById('preferredCategories').value = config.user_profile.preferred_categories.join(', ');
                         document.getElementById('preferredWorkType').value = config.user_profile.preferred_work_type.join(', ');
                         document.getElementById('userDescription').value = config.user_profile.description;
+                        document.getElementById('llmType').value = config.llm_settings.type;
                         document.getElementById('llmModel').value = config.llm_settings.model;
                         document.getElementById('llmTemperature').value = config.llm_settings.temperature;
                         document.getElementById('maxCategories').value = config.llm_settings.max_categories;
                         document.getElementById('minRelevanceScore').value = config.llm_settings.min_relevance_score;
                         document.getElementById('minScore').value = config.matching_settings.min_score;
                         document.getElementById('maxJobs').value = config.matching_settings.max_jobs;
+                        document.getElementById('batchSize').value = config.matching_settings.batch_size;
                     }
                 } catch (error) {
                     console.error('設定読み込みエラー:', error);
@@ -466,6 +506,7 @@ async def home():
                         description: document.getElementById('userDescription').value
                     },
                     llm_settings: {
+                        type: document.getElementById('llmType').value,
                         model: document.getElementById('llmModel').value,
                         temperature: parseFloat(document.getElementById('llmTemperature').value),
                         max_categories: parseInt(document.getElementById('maxCategories').value),
@@ -473,7 +514,8 @@ async def home():
                     },
                     matching_settings: {
                         min_score: parseFloat(document.getElementById('minScore').value),
-                        max_jobs: parseInt(document.getElementById('maxJobs').value)
+                        max_jobs: parseInt(document.getElementById('maxJobs').value),
+                        batch_size: parseInt(document.getElementById('batchSize').value)
                     }
                 };
                 
@@ -497,6 +539,50 @@ async def home():
                     alert('設定の保存に失敗しました');
                 }
             });
+            
+            // LLMタイプに応じてモデルオプションを更新
+            function updateModelOptions() {
+                const llmType = document.getElementById('llmType').value;
+                const modelSelect = document.getElementById('llmModel');
+                
+                // 既存のオプションをクリア
+                modelSelect.innerHTML = '';
+                
+                if (llmType === 'local') {
+                    // Ollamaモデル
+                    const localModels = [
+                        { value: 'elyza:jp8b', text: 'Elyza JP8B (Local)' },
+                        { value: 'llama3.2:3b', text: 'Llama 3.2 3B (Local)' },
+                        { value: 'llama3.2:7b', text: 'Llama 3.2 7B (Local)' },
+                        { value: 'mistral:7b', text: 'Mistral 7B (Local)' }
+                    ];
+                    localModels.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.value;
+                        option.textContent = model.text;
+                        modelSelect.appendChild(option);
+                    });
+                } else if (llmType === 'deepseek') {
+                    // DeepSeekモデル
+                    const deepseekModels = [
+                        { value: 'deepseek-chat', text: 'DeepSeek Chat' },
+                        { value: 'deepseek-coder', text: 'DeepSeek Coder' }
+                    ];
+                    deepseekModels.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.value;
+                        option.textContent = model.text;
+                        modelSelect.appendChild(option);
+                    });
+                }
+                
+                // デフォルト値を設定
+                if (llmType === 'local') {
+                    modelSelect.value = 'elyza:jp8b';
+                } else if (llmType === 'deepseek') {
+                    modelSelect.value = 'deepseek-chat';
+                }
+            }
             
             async function loadAllResults() {
                 try {
@@ -852,9 +938,9 @@ def update_config_with_web_settings(web_config):
         
         # LLM設定を更新
         llm_config = {
-            "enabled": True,
             "max_categories": web_config["llm_settings"]["max_categories"],
             "min_relevance_score": web_config["llm_settings"]["min_relevance_score"],
+            "llm_type": web_config["llm_settings"]["type"],
             "llm_model": web_config["llm_settings"]["model"],
             "temperature": web_config["llm_settings"]["temperature"],
             "max_tokens": 1000
@@ -869,6 +955,8 @@ def update_config_with_web_settings(web_config):
         matching_config = {
             "min_score": web_config["matching_settings"]["min_score"],
             "max_jobs": web_config["matching_settings"]["max_jobs"],
+            "batch_size": web_config["matching_settings"]["batch_size"],
+            "llm_type": web_config["llm_settings"]["type"],
             "llm_model": web_config["llm_settings"]["model"],
             "temperature": web_config["llm_settings"]["temperature"]
         }

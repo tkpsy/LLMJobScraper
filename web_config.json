@@ -12,13 +12,15 @@
     "description": "FigmaやAdobeを使ってwebなどのデザインができます"
   },
   "llm_settings": {
-    "model": "deepseek-chat",
+    "type": "local",
+    "model": "elyza:jp8b",
     "temperature": 0.2,
     "max_categories": 2,
     "min_relevance_score": 8
   },
   "matching_settings": {
     "min_score": 80,
-    "max_jobs": 3
+    "max_jobs": 20,
+    "batch_size": 10
   }
 }

@@ -372,14 +372,8 @@ class CrowdWorksCategoryExplorer:
 
     def select_categories_by_llm(self, categories: Dict, user_profile: UserProfile) -> List[Dict]:
         """LLMを使用してユーザープロファイルに基づいて最適なカテゴリを選択"""
-        if not LLM_CATEGORY_SELECTION_CONFIG["enabled"]:
-            if OUTPUT_CONFIG["console_output"]:
-                print("⚠️  LLMカテゴリ選択が無効になっています。デフォルトカテゴリを使用します。")
-            return self._get_default_categories(categories)
-        
         if OUTPUT_CONFIG["console_output"]:
             print("🤖 LLMによるカテゴリ選択を実行中...")
-
 
         main_categories = categories['main_categories']
         categories_and_url = {}
@@ -394,6 +388,7 @@ class CrowdWorksCategoryExplorer:
         prompt = self._create_category_selection_prompt(categories_name, user_profile)
         
         # LLMにカテゴリ選択を依頼
+        llm_type = LLM_CATEGORY_SELECTION_CONFIG["llm_type"]
         response = generate_chat_completion(
             client=self.job_matcher.client,
             messages=[
