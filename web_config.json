@@ -1,0 +1,24 @@
+{
+  "user_profile": {
+    "skills": [
+      "Figma"
+    ],
+    "preferred_categories": [
+      "webデザイン"
+    ],
+    "preferred_work_type": [
+      "リモート"
+    ],
+    "description": "FigmaやAdobeを使ってwebなどのデザインができます"
+  },
+  "llm_settings": {
+    "model": "deepseek-chat",
+    "temperature": 0.2,
+    "max_categories": 2,
+    "min_relevance_score": 8
+  },
+  "matching_settings": {
+    "min_score": 80,
+    "max_jobs": 3
+  }
+}

@@ -10,7 +10,7 @@ from src.processors.job_extractor import JobExtractor
 from src.processors.job_matcher import JobMatcher
 from src.models.user_profile import UserProfile
 from src.utils.config import (
-    SCRAPING_CONFIG, MATCHING_CONFIG, AUTO_EXECUTION_CONFIG, 
+    SCRAPING_CONFIG, MATCHING_CONFIG, 
     USER_PROFILE_CONFIG, EXECUTION_CONFIG, OUTPUT_CONFIG, LLM_CATEGORY_SELECTION_CONFIG
 )
 from api import generate_chat_completion
@@ -351,7 +351,7 @@ class CrowdWorksCategoryExplorer:
                 
                 # 連続実行の場合は待機
                 if i < len(selected_categories):
-                    delay = AUTO_EXECUTION_CONFIG.get("delay_between_categories", 5)
+                    delay = EXECUTION_CONFIG.get("delay_between_categories", 5)
                     if OUTPUT_CONFIG["console_output"]:
                         print(f"\n⏳ 次のカテゴリまで {delay} 秒待機...")
                     time.sleep(delay)

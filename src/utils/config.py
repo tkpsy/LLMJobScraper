@@ -27,59 +27,32 @@ SCRAPING_CONFIG = {
 
 # マッチング設定
 MATCHING_CONFIG = {
-    "min_score": 70.0,
-    "max_jobs": 5,
+    "min_score": 80,
+    "max_jobs": 3,
     "llm_model": "deepseek-chat",
-    "temperature": 0.1
+    "temperature": 0.2,
 }
 
-# ターゲットカテゴリ
-TARGET_CATEGORIES = [
-    'AI・機械学習',
-    '機械学習・ディープラーニング',
-    'AI・チャットボット開発',
-    'ChatGPT開発',
-    'AIアノテーション',
-    'データサイエンス'
-]
-
-# 自動実行設定
-AUTO_EXECUTION_CONFIG = {
-    "enabled": False,  # 従来の手動設定を無効化
-    "target_categories": [
-        {
-            "main_category": "AI（人工知能）・機械学習",
-            "subcategory": None,  # Noneの場合はメインカテゴリ全体を対象
-            "description": "AI・機械学習分野全般の案件を取得"
-        }
-        # 複数カテゴリを設定したい場合は以下のように追加
-        # {
-        #     "main_category": "システム開発",
-        #     "subcategory": "Web開発・システム設計",
-        #     "description": "Web開発案件を取得"
-        # }
-    ],
-    "continuous_execution": False,  # 全カテゴリを連続実行するかどうか
-    "delay_between_categories": 5,  # カテゴリ間の待機時間（秒）
-}
 
 # LLMカテゴリ選択設定
 LLM_CATEGORY_SELECTION_CONFIG = {
-    "enabled": True,  # LLMカテゴリ選択を有効にする
-    "max_categories": 3,  # 最大選択カテゴリ数
-    "min_relevance_score": 7.0,  # 最低関連度スコア
-    "llm_model": "deepseek-chat",  # 使用するLLMモデル
-    "temperature": 0.1,  # LLMの温度設定
-    "max_tokens": 1000,  # 最大トークン数
+    "enabled": True,
+    "max_categories": 2,
+    "min_relevance_score": 8,
+    "llm_model": "deepseek-chat",
+    "temperature": 0.2,
+    "max_tokens": 1000,
 }
+
 
 # ユーザープロファイル設定
 USER_PROFILE_CONFIG = {
-    "skills": ["Python", "機械学習", "AI", "データサイエンス", "ChatGPT", "深層学習", "自然言語処理", "Web制作", "デザイン"],
-    "preferred_categories": ["AI・機械学習", "機械学習・ディープラーニング", "ChatGPT開発", "AI・チャットボット開発"],
-    "preferred_work_type": ["リモート", "フルリモート", "在宅"],
-    "description": "AI・機械学習分野でのフリーランス案件を探しています。特にChatGPT、LLM、深層学習関連の案件に興味があります。Python、TensorFlow、PyTorchを使った開発経験があります。また，Next.jsなどを利用したフロントエンドやバックエンドの開発経験があります。"
+    "skills": ['Figma'],
+    "preferred_categories": ['webデザイン'],
+    "preferred_work_type": ['リモート'],
+    "description": "FigmaやAdobeを使ってwebなどのデザインができます",
 }
+
 
 # 実行オプション設定
 EXECUTION_CONFIG = {
@@ -88,6 +61,7 @@ EXECUTION_CONFIG = {
     "max_pages_per_category": 5, # カテゴリごとの最大取得ページ数（1=単一ページ, 2以上=複数ページ）
     "show_progress": True,       # 進捗表示を行うかどうか
     "auto_open_results": False,  # 結果ファイルを自動で開くかどうか
+    "delay_between_categories": 5,  # カテゴリ間の待機時間（秒）
 }
 
 # 出力設定
