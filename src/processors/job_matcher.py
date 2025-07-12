@@ -57,15 +57,12 @@ class JobMatcher:
 1. スキルの合致度
 2. 希望カテゴリとの合致度
 3. 希望する働き方との合致度
-4. 予算の適切性
-5. 経験年数との適合性
+4. 案件内容とユーザー詳細情報の親和性
 
 【ユーザープロファイル】
 - スキル: {', '.join(user_profile.skills)}
-- 経験年数: {user_profile.experience_years}年
 - 希望カテゴリ: {', '.join(user_profile.preferred_categories)}
 - 希望する働き方: {', '.join(user_profile.preferred_work_type)}
-- 希望最低予算: {user_profile.min_budget}円
 - 追加情報: {user_profile.description}
 
 【評価対象案件】
@@ -204,10 +201,8 @@ class JobMatcher:
             "実行日時": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             "ユーザープロファイル": {
                 "スキル": user_profile.skills,
-                "経験年数": user_profile.experience_years,
                 "希望カテゴリ": user_profile.preferred_categories,
                 "希望する働き方": user_profile.preferred_work_type,
-                "希望最低予算": user_profile.min_budget,
                 "追加情報": user_profile.description
             },
             "マッチング結果": [

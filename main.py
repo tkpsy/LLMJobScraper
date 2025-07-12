@@ -11,8 +11,9 @@ from src.processors.job_matcher import JobMatcher
 from src.models.user_profile import UserProfile
 from src.utils.config import (
     SCRAPING_CONFIG, MATCHING_CONFIG, AUTO_EXECUTION_CONFIG, 
-    USER_PROFILE_CONFIG, EXECUTION_CONFIG, OUTPUT_CONFIG
+    USER_PROFILE_CONFIG, EXECUTION_CONFIG, OUTPUT_CONFIG, LLM_CATEGORY_SELECTION_CONFIG
 )
+from api import generate_chat_completion
 
 class CrowdWorksCategoryExplorer:
     """カテゴリベースのCrowdWorks案件探索システム"""
@@ -34,10 +35,8 @@ class CrowdWorksCategoryExplorer:
         # 設定ファイルからユーザープロファイルを作成
         self.user_profile = UserProfile(
             skills=USER_PROFILE_CONFIG["skills"],
-            experience_years=USER_PROFILE_CONFIG["experience_years"],
             preferred_categories=USER_PROFILE_CONFIG["preferred_categories"],
             preferred_work_type=USER_PROFILE_CONFIG["preferred_work_type"],
-            min_budget=USER_PROFILE_CONFIG["min_budget"],
             description=USER_PROFILE_CONFIG["description"]
         )
     
@@ -107,8 +106,8 @@ class CrowdWorksCategoryExplorer:
             # 設定を元に戻す
             SCRAPING_CONFIG["base_url"] = original_url
     
-    def extract_and_match_jobs(self, html_files: List[Path]) -> List:
-        """複数のHTMLファイルから案件を抽出してマッチング評価を行う"""
+    def extract_jobs_only(self, html_files: List[Path]) -> List:
+        """HTMLファイルから案件を抽出するのみ（ファイル保存なし）"""
         if OUTPUT_CONFIG["console_output"]:
             print("案件情報を抽出中...")
         
@@ -132,40 +131,53 @@ class CrowdWorksCategoryExplorer:
             print(f"合計抽出件数: {len(all_jobs)}件")
             print(f"重複除去後: {len(unique_jobs)}件")
         
-        if not unique_jobs:
+        return unique_jobs
+    
+    def match_jobs_only(self, jobs: List) -> List:
+        """案件のマッチング評価のみ（ファイル保存なし）"""
+        if not jobs:
             if OUTPUT_CONFIG["console_output"]:
                 print("案件が見つかりませんでした。")
             return []
         
-        # 案件をJSONで保存
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        job_file = self.job_extractor.save_jobs_to_json(unique_jobs, timestamp)
-        self.saved_files['job_files'].append(job_file)
-        
-        if OUTPUT_CONFIG["console_output"]:
-            print(f"抽出された案件数: {len(unique_jobs)}件")
-        
-        # マッチング評価
         if OUTPUT_CONFIG["console_output"]:
             print("案件のマッチング評価を実行中...")
+        
+        # 一時的に案件を設定してマッチング実行
+        self.job_matcher.jobs = jobs
         matches = self.job_matcher.find_matching_jobs(
             user_profile=self.user_profile,
             min_score=MATCHING_CONFIG["min_score"],
             max_jobs=MATCHING_CONFIG["max_jobs"]
         )
         
-        # 推薦案件をJSONで保存
-        if matches:
+        return matches
+    
+    def save_all_jobs_and_matches(self, all_jobs: List, all_matches: List) -> None:
+        """全カテゴリの案件とマッチング結果を統合して保存"""
+        if OUTPUT_CONFIG["console_output"]:
+            print(f"\n📊 全カテゴリの案件を統合保存中...")
+            print(f"   総案件数: {len(all_jobs)}件")
+            print(f"   マッチング結果: {len(all_matches)}件")
+        
+        # 全案件をJSONで保存
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        job_file = self.job_extractor.save_jobs_to_json(all_jobs, timestamp)
+        self.saved_files['job_files'].append(job_file)
+        
+        # 全マッチング結果を保存
+        if all_matches:
             try:
-                matching_result_file = self.job_matcher.save_matching_results(matches, self.user_profile)
+                matching_result_file = self.job_matcher.save_matching_results(all_matches, self.user_profile)
                 self.saved_files['match_files'].append(matching_result_file)
                 
                 if OUTPUT_CONFIG["console_output"]:
-                    print(f"推薦案件を {matching_result_file} に保存しました。")
+                    print(f"✅ 全案件を {job_file} に保存しました。")
+                    print(f"✅ 全マッチング結果を {matching_result_file} に保存しました。")
                     
             except Exception as e:
                 if OUTPUT_CONFIG["console_output"]:
-                    print(f"推薦案件の保存中にエラーが発生しました: {e}")
+                    print(f"マッチング結果の保存中にエラーが発生しました: {e}")
         
         # マッチング結果のCSVファイルを記録
         match_files = list(Path("data/matches").glob("all_evaluations_*.csv"))
@@ -173,8 +185,6 @@ class CrowdWorksCategoryExplorer:
             latest_match_file = max(match_files, key=lambda x: x.stat().st_mtime)
             if latest_match_file not in self.saved_files['match_files']:
                 self.saved_files['match_files'].append(latest_match_file)
-        
-        return matches
     
     def _remove_duplicate_jobs(self, jobs: List) -> List:
         """重複案件を除去する"""
@@ -306,44 +316,49 @@ class CrowdWorksCategoryExplorer:
             return
         
         try:
-            for i, target_config in enumerate(AUTO_EXECUTION_CONFIG["target_categories"]):
+            # LLMによるカテゴリ選択
+            selected_categories = self.select_categories_by_llm(categories, self.user_profile)
+            
+            if not selected_categories:
                 if OUTPUT_CONFIG["console_output"]:
-                    print(f"\n🎯 実行 {i+1}/{len(AUTO_EXECUTION_CONFIG['target_categories'])}: {target_config['description']}")
-                
-                # 設定からカテゴリを検索
-                selected_category = self.find_category_by_name(
-                    categories, 
-                    target_config["main_category"], 
-                    target_config.get("subcategory")
-                )
-                
-                if selected_category is None:
-                    print(f"⚠️  カテゴリが見つかりません: {target_config['main_category']}")
-                    if target_config.get("subcategory"):
-                        print(f"    サブカテゴリ: {target_config['subcategory']}")
-                    continue
-                
+                    print("⚠️  適切なカテゴリが見つかりませんでした。")
+                return
+            
+            # 全カテゴリの案件を収集
+            all_jobs = []
+            all_matches = []
+            
+            # 選択されたカテゴリでスクレイピング実行
+            for i, selected_category in enumerate(selected_categories, 1):
                 if OUTPUT_CONFIG["console_output"]:
-                    print(f"📂 対象カテゴリ: {selected_category['name']}")
+                    print(f"\n🎯 実行 {i}/{len(selected_categories)}: {selected_category['name']}")
                 
                 # カテゴリページをスクレイピング
                 html_files = self.scrape_category_jobs(selected_category['url'])
                 if not html_files:
                     continue
                 
-                # 案件抽出とマッチング
-                matches = self.extract_and_match_jobs(html_files)
+                # 案件抽出（ファイル保存は行わない）
+                category_jobs = self.extract_jobs_only(html_files)
+                all_jobs.extend(category_jobs)
+                
+                # マッチング評価（ファイル保存は行わない）
+                category_matches = self.match_jobs_only(category_jobs)
+                all_matches.extend(category_matches)
                 
                 # 結果表示
-                self.display_matches(matches)
+                self.display_matches(category_matches)
                 
                 # 連続実行の場合は待機
-                if (AUTO_EXECUTION_CONFIG["continuous_execution"] and 
-                    i < len(AUTO_EXECUTION_CONFIG["target_categories"]) - 1):
-                    delay = AUTO_EXECUTION_CONFIG["delay_between_categories"]
+                if i < len(selected_categories):
+                    delay = AUTO_EXECUTION_CONFIG.get("delay_between_categories", 5)
                     if OUTPUT_CONFIG["console_output"]:
                         print(f"\n⏳ 次のカテゴリまで {delay} 秒待機...")
                     time.sleep(delay)
+            
+            # 全カテゴリの案件を統合して保存
+            if all_jobs:
+                self.save_all_jobs_and_matches(all_jobs, all_matches)
         
         except KeyboardInterrupt:
             if OUTPUT_CONFIG["console_output"]:
@@ -354,6 +369,134 @@ class CrowdWorksCategoryExplorer:
             self.display_saved_files_summary()
             if OUTPUT_CONFIG["console_output"]:
                 print("\nお疲れ様でした！")
+
+    def select_categories_by_llm(self, categories: Dict, user_profile: UserProfile) -> List[Dict]:
+        """LLMを使用してユーザープロファイルに基づいて最適なカテゴリを選択"""
+        if not LLM_CATEGORY_SELECTION_CONFIG["enabled"]:
+            if OUTPUT_CONFIG["console_output"]:
+                print("⚠️  LLMカテゴリ選択が無効になっています。デフォルトカテゴリを使用します。")
+            return self._get_default_categories(categories)
+        
+        if OUTPUT_CONFIG["console_output"]:
+            print("🤖 LLMによるカテゴリ選択を実行中...")
+
+
+        main_categories = categories['main_categories']
+        categories_and_url = {}
+        for main_category in main_categories:
+            subcategories = main_category['subcategories']
+            for subcategory in subcategories:
+                categories_and_url[subcategory['name']] = subcategory['url']
+
+        categories_name = categories_and_url.keys()
+        
+        # LLMプロンプトを作成
+        prompt = self._create_category_selection_prompt(categories_name, user_profile)
+        
+        # LLMにカテゴリ選択を依頼
+        response = generate_chat_completion(
+            client=self.job_matcher.client,
+            messages=[
+                {"role": "system", "content": "あなたはCrowdWorksの案件カテゴリ選択の専門家です。ユーザーのスキル、経験、希望に基づいて最適なカテゴリを選択してください。"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=LLM_CATEGORY_SELECTION_CONFIG["temperature"]
+        )
+
+        # LLMの応答を解析
+        if hasattr(response, "choices"):
+            # OpenAI/DeepSeek
+            content = response.choices[0].message.content
+        else:
+            # Ollama
+            content = response['choices'][0]['message']['content']
+
+        selected_data = self._parse_llm_category_response(content, categories_and_url)
+        
+
+        if OUTPUT_CONFIG["console_output"]:
+            print(f"✅ LLMが {len(selected_data)} 個のカテゴリを選択しました")
+            for i, cat in enumerate(selected_data, 1):
+                print(f"   {i}. {cat['name']} ")
+        
+        return selected_data
+    
+    
+    def _create_category_selection_prompt(self, categories: Dict, user_profile: UserProfile) -> str:
+        """カテゴリ選択用のLLMプロンプトを作成"""
+        
+        prompt = f"""
+あなたはCrowdWorksの案件カテゴリ選択の専門家です。以下のユーザープロファイルを分析し、最も適したカテゴリを選択してください。
+
+## ユーザープロファイル
+- **スキル**: {', '.join(user_profile.skills)}
+- **希望カテゴリ**: {', '.join(user_profile.preferred_categories)}
+- **自己紹介**: {user_profile.description}
+
+## 利用可能なカテゴリ
+{categories}
+
+## 選択条件
+1. **ユーザーのスキルと経験に最も適したカテゴリを選択**
+2. **最大{LLM_CATEGORY_SELECTION_CONFIG["max_categories"]}個のカテゴリまで選択可能**
+3. **各カテゴリに0-10の関連度スコアを付与**
+4. **関連度スコア{LLM_CATEGORY_SELECTION_CONFIG["min_relevance_score"]}以上のカテゴリのみ選択**
+
+## 選択の優先順位
+1. ユーザーのスキルと直接関連するカテゴリを優先
+2. 希望カテゴリに含まれるカテゴリを優先
+
+## 回答形式
+以下のJSON形式で回答してください：
+```json
+[
+  {{
+    "main_category": "カテゴリ名（上記リストから正確に選択）",
+    "relevance_score": 8.5,
+  }}
+]
+```
+
+**重要**: カテゴリ名は上記の「利用可能なカテゴリ」に記載されている正確な名前を使用してください。
+"""
+        return prompt
+    
+
+    def _parse_llm_category_response(self, response_text: str, categories_and_url: Dict) -> List[Dict]:
+        """LLMの応答を解析してカテゴリ情報を抽出"""
+        # JSON部分を抽出
+        import re
+        import json
+        
+        # JSON部分を検索
+        json_match = re.search(r'```json\s*(.*?)\s*```', response_text, re.DOTALL)
+        if not json_match:
+            # JSONブロックがない場合は全体をJSONとして解析
+            json_text = response_text.strip()
+        else:
+            json_text = json_match.group(1).strip()
+
+        # JSONテキストをクリーンアップ（trailing commaを除去）
+        json_text = re.sub(r',\s*}', '}', json_text)
+        json_text = re.sub(r',\s*]', ']', json_text)
+        
+        # JSONを解析
+        selected_data = json.loads(json_text)
+        
+        # フラットなカテゴリリストを作成（検索用）
+        flat_categories = []
+        for category in selected_data:
+            category_name = category['main_category']
+            category_url = categories_and_url.get(category_name)
+            # メインカテゴリを追加
+            flat_categories.append({
+                "name": category_name,
+                "url": category_url,
+            })
+
+        return flat_categories
+    
+
 
 def main():
     """メイン関数"""
