@@ -47,7 +47,7 @@ def get_default_config():
         },
         "llm_settings": {
             "type": "local",
-            "model": "elyza:jp8b",
+            "model": "qwen2.5:latest",
             "temperature": 0.2,
             "max_categories": 3,
             "min_relevance_score": 7.0
@@ -393,7 +393,7 @@ async def home():
                     <div class="form-group">
                         <label for="llmModel">LLMモデル:</label>
                         <select id="llmModel" class="form-control">
-                            <option value="elyza:jp8b">Elyza JP8B (Local)</option>
+                            <option value="qwen2.5:latest">Qwen2.5 (Local)</option>
                             <option value="deepseek-chat">DeepSeek Chat</option>
                             <option value="gpt-4">GPT-4</option>
                             <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
@@ -551,7 +551,7 @@ async def home():
                 if (llmType === 'local') {
                     // Ollamaモデル
                     const localModels = [
-                        { value: 'elyza:jp8b', text: 'Elyza JP8B (Local)' },
+                        { value: 'qwen2.5:latest', text: 'Qwen2.5 (Local)' },
                         { value: 'llama3.2:3b', text: 'Llama 3.2 3B (Local)' },
                         { value: 'llama3.2:7b', text: 'Llama 3.2 7B (Local)' },
                         { value: 'mistral:7b', text: 'Mistral 7B (Local)' }
@@ -578,7 +578,7 @@ async def home():
                 
                 // デフォルト値を設定
                 if (llmType === 'local') {
-                    modelSelect.value = 'elyza:jp8b';
+                    modelSelect.value = 'qwen2.5:latest';
                 } else if (llmType === 'deepseek') {
                     modelSelect.value = 'deepseek-chat';
                 }
@@ -1016,6 +1016,64 @@ async def get_status():
 
 if __name__ == "__main__":
     import uvicorn
+    import socket
+    import subprocess
+    import sys
+    
+    def check_port_in_use(port):
+        """ポートが使用中かチェック"""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(('localhost', port)) == 0
+    
+    def kill_process_on_port(port):
+        """指定ポートを使用しているプロセスを終了"""
+        try:
+            # 方法1: lsofでポートを使用しているプロセスのPIDを取得
+            try:
+                result = subprocess.run(['lsof', '-ti', f':{port}'], 
+                                      capture_output=True, text=True)
+                if result.stdout.strip():
+                    pids = result.stdout.strip().split('\n')
+                    for pid in pids:
+                        if pid:
+                            print(f"ポート{port}を使用しているプロセス {pid} を終了します...")
+                            subprocess.run(['kill', '-9', pid])
+                            print(f"プロセス {pid} を終了しました")
+                    return True
+            except FileNotFoundError:
+                print("lsofコマンドが見つかりません。別の方法でプロセスを終了します...")
+            
+            # 方法2: netstatでポートを使用しているプロセスのPIDを取得
+            try:
+                result = subprocess.run(['netstat', '-tlnp'], 
+                                      capture_output=True, text=True)
+                for line in result.stdout.split('\n'):
+                    if f':{port}' in line and 'LISTEN' in line:
+                        parts = line.split()
+                        if len(parts) >= 7:
+                            pid_part = parts[6]
+                            if '/' in pid_part:
+                                pid = pid_part.split('/')[0]
+                                print(f"ポート{port}を使用しているプロセス {pid} を終了します...")
+                                subprocess.run(['kill', '-9', pid])
+                                print(f"プロセス {pid} を終了しました")
+                                return True
+            except Exception as e:
+                print(f"netstatエラー: {e}")
+                
+        except Exception as e:
+            print(f"プロセス終了エラー: {e}")
+        return False
+    
+    # ポート8000が使用中かチェック
+    if check_port_in_use(8000):
+        print("⚠️  ポート8000が使用中です。既存のプロセスを終了します...")
+        if kill_process_on_port(8000):
+            print("✅ 既存のプロセスを終了しました")
+        else:
+            print("❌ プロセスの終了に失敗しました")
+            sys.exit(1)
+    
     print("🚀 シンプルWebサーバーを起動中...")
     print("📱 http://localhost:8000 にアクセスしてください")
     print("🌐 Docker環境では http://0.0.0.0:8000 でリッスンしています")

@@ -44,7 +44,7 @@ http://localhost:8000
 1. **Ollamaモデルのダウンロード**
    ```bash
    # コンテナが起動した後、Ollamaコンテナに接続
-   docker exec -it ollama ollama pull elyza:jp8b
+   docker exec -it ollama ollama pull qwen2.5:latest
    
    # 他のモデルも必要に応じてダウンロード
    docker exec -it ollama ollama pull llama3.2:3b
@@ -111,7 +111,7 @@ OLLAMA_HOST=http://ollama:11434
 2. **Ollamaモデルが見つからない**
    ```bash
    # モデルを再ダウンロード
-   docker exec -it ollama ollama pull elyza:jp8b
+   docker exec -it ollama ollama pull qwen2.5:latest
    ```
 
 3. **メモリ不足**

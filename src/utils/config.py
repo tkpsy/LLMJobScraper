@@ -31,7 +31,7 @@ MATCHING_CONFIG = {
     "max_jobs": 20,
     "batch_size": 10,
     "llm_type": "local",
-    "llm_model": "elyza:jp8b",
+    "llm_model": "qwen2.5:latest",
     "temperature": 0.2,
 }
 
@@ -43,7 +43,7 @@ LLM_CATEGORY_SELECTION_CONFIG = {
     "max_categories": 2,
     "min_relevance_score": 8,
     "llm_type": "local",
-    "llm_model": "elyza:jp8b",
+    "llm_model": "qwen2.5:latest",
     "temperature": 0.2,
     "max_tokens": 1000,
 }

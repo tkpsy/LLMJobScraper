@@ -39,7 +39,7 @@ def get_client(llm_type: LLMType = "local") -> Union[OpenAI, ollama]:
     elif llm_type == "local":
         # Ollamaが利用可能かチェック
         try:
-            required_model = "elyza:jp8b"
+            required_model = "qwen2.5:latest"
             print(f"Local LLMモデル '{required_model}' を使用します。")
             return ollama
             
@@ -95,7 +95,7 @@ def generate_chat_completion(
         else:
             # Local LLM (Ollama) を使用
             response = client.chat(
-                model='elyza:jp8b',
+                model='qwen2.5:latest',
                 messages=messages,
                 stream=False,
                 format="json" if response_format else None,

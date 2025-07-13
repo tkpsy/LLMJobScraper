@@ -47,7 +47,7 @@ DEEPSEEK_API_KEY=your_api_key_here
 curl -fsSL https://ollama.ai/install.sh | sh
 
 # モデルのダウンロード
-ollama pull elyza:jp8b
+ollama pull qwen2.5:latest
 ```
 
 ### 方法2: Docker環境でのセットアップ
@@ -65,27 +65,36 @@ Dockerを使用すると、環境構築なしで簡単にシステムを起動�
    cd scraping_base
    ```
 
-2. **Dockerでコンテナを起動**
+2. **Dockerイメージのビルド**
+   ```bash
+   docker-compose build
+   ```
+
+3. **Dockerでコンテナを起動**
    ```bash
    docker-compose up -d
    ```
 
-3. **コンテナに入る**
+4. **コンテナに入る**
    ```bash
    docker exec -it llm-job-scraper bash
    ```
 
-4. **Webサーバーを起動**
+5. **Ollama serverを起動**
+   ```bash
+   ollama serve &
+   ```
+6. **Webサーバーを起動**
    ```bash
    python simple_server.py
    ```
 
-5. **ブラウザでアクセス**
+7. **ブラウザでアクセス**
    ```
    http://localhost:8000
    ```
 
-6. **Dockerコンテナを停止**
+8. **Dockerコンテナを停止**
     ```bash
     docker-compose down
     ```
@@ -115,7 +124,7 @@ docker-compose down
 #### トラブルシューティング
 
 - **ポート8000が使用中**: 別のポートで起動するか、既存のプロセスを停止
-- **Ollamaモデルエラー**: コンテナ内で`ollama pull elyza:jp8b`を実行
+- **Ollamaモデルエラー**: コンテナ内で`ollama pull qwen2.5:latest`を実行
 - **詳細なログ**: コンテナ内でログを確認
 
 詳細な設定やトラブルシューティングは [DOCKER.md](DOCKER.md) を参照してください。
@@ -196,7 +205,7 @@ python main.py
 ## 🔧 技術仕様
 
 ### 対応LLM
-- **ローカル**: Ollama（Elyza JP8B、Llama 3.2、Mistral 7Bなど）
+- **ローカル**: Ollama（Qwen2.5など）
 - **API**: DeepSeek Chat、DeepSeek Coder
 
 ### スクレイピング機能

@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     net-tools \
+    lsof \
     && rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリの設定
@@ -23,6 +24,9 @@ RUN playwright install-deps
 
 # Ollamaのインストール（ローカルLLM用）
 RUN curl -fsSL https://ollama.ai/install.sh | sh
+
+# Qwen2.5モデルのダウンロード（サーバー起動後に実行）
+RUN ollama serve & sleep 10 && ollama pull qwen2.5:latest
 
 # アプリケーションコードをコピー
 COPY . .
